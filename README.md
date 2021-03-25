@@ -66,37 +66,43 @@
 </details>
 
 <details>
-<summary><b>useScroll</b></summary>
+<summary><b>useInfiniteScroll</b></summary>
 <div>
 
   <p>
 
-    import { useEffect, useRef } from "react"
+    import { useEffect, useRef, useState } from 'react'
 
-    export const useScroll = (parentRef, childRef, callback): void => {
 
-        const observer = useRef<IntersectionObserver>()
+    export const useInfiniteScroll = <RefType extends HTMLDivElement>(callback: () => void, trigger: any) => {
 
-        useEffect(() => {
-            const options = {
-                root: parentRef.current,
-                rootMargin: '0px',
-                threshold: 0
-            }
-            observer.current = new IntersectionObserver(([target]) => {
-                if (target.isIntersecting) {
-                    callback()
-                }
-            }, options)
+        const [canScroll, setCanScroll] = useState(true)
+        const containerRef = useRef<RefType>()
     
-            observer.current.observe(childRef.current)
+        useEffect(() => {
+            const container = containerRef.current
+    
+            const handleScroll = () => {
+                if (canScroll && container.scrollTop === container.scrollHeight - container.offsetHeight) {
+                    callback()
+                    setCanScroll(false)
+                }
+            }
+    
+            if (container) container.addEventListener('scroll', handleScroll)
     
             return () => {
-                observer.current.unobserve(childRef.current)
+                if (container) container.removeEventListener('scroll', handleScroll)
             }
-
-        }, [callback])
+        }, [canScroll, callback])
+    
+        useEffect(() => {
+            setCanScroll(true)
+        }, [trigger])
+    
+        return containerRef
     }
+
   </p>
 </div>
 </details>
