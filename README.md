@@ -145,24 +145,25 @@
 
     import { useEffect, useState } from "react"
 
-    type UseRequestOutput<D> = [D, boolean, string]
-
-    export const useRequest = <D = any>(request): UseRequestOutput<D> => {
-
-        const [data, setData] = useState<D>(null);
+    type UseRequestOutput<Response, Error> = [Response, boolean, Error | null]
+    
+    export const useRequest = <Response = any, Error = any>(request: () => Promise<any>): UseRequestOutput<Response, Error> => {
+    
+        const [response, setResponse] = useState<Response>(null);
         const [loading, setLoading] = useState(false);
-        const [error, setError] = useState('');
+        const [error, setError] = useState<Error | null>(null);
     
         useEffect(() => {
             setLoading(true)
             request()
-                .then(response => setData(response.data))
+                .then(response => setResponse(response.data))
                 .catch(error => setError(error))
                 .finally(() => setLoading(false))
         }, [])
     
-        return [data, loading, error]
+        return [response, loading, error]
     }
+
   </p>
 </div>
 </details>
